@@ -19,8 +19,16 @@
 #include <errno.h>
 #include <stdarg.h>
 #include <unistd.h>
+#include <sys/select.h>
+#include <sys/time.h>
+
+#define max(a, b) \
+        __extension__ ({ __typeof__ (a) _a = (a);\
+          __typeof__ (b) _b = (b);\
+          _a > _b ? _a : _b; })
 
 #define MAXLINE 256
+#define LISTENQ 5
 
 void err_sys(const char *fmt, ...);
 void err_doit(int errnoflag, int error, const char *fmt, va_list ap);
