@@ -20,6 +20,7 @@
 #include <stdarg.h>
 #include <unistd.h>
 #include <sys/select.h>
+#include <poll.h>
 #include <sys/time.h>
 
 #define max(a, b) \

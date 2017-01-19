@@ -6,6 +6,9 @@
  ************************************************************************/
 
 #include "../share/tcp_server.h"
+#include <limits.h>
+#define INFTIM -1
+#define OPEN_MAX 1024
 
 int main(int argc, char *argv[])
 {
@@ -23,7 +26,6 @@ int main(int argc, char *argv[])
         serverport = argv[2];
     }
     
-    
     int listenfd;
     int connfd;
     struct sockaddr_in serveraddr;
@@ -33,41 +35,32 @@ int main(int argc, char *argv[])
     Bind(listenfd, (struct sockaddr *)&serveraddr, sizeof(serveraddr)); 
     Listen(listenfd, LISTENQ);
 
-    int maxfd;
-    int sockfd;
-    int nready;
-    int client[FD_SETSIZE];
-    int i;
-    int maxi;
+    struct pollfd client[OPEN_MAX];
+    int i, n,maxi, sockfd, nready;
     char buf[MAXLINE];
-    ssize_t n;
-    maxfd = listenfd;
-    fd_set rset, allset;
-    for (i = 0; i < FD_SETSIZE; i++) {
-        client[i] = -1;
-    } 
-    FD_ZERO(&allset);
-    FD_SET(listenfd, &allset);
+    client[0].fd = listenfd;
+    client[0].events = POLLRDNORM;
+    for (i = 0; i < OPEN_MAX; i++) {
+        client[i].fd = -1;
+    }
+    maxi = 0;
 
     socklen_t remote_len = sizeof(struct sockaddr_in);
     for ( ; ; ) {
-        rset = allset;
-        nready = Select(maxfd+1, &rset, NULL, NULL, NULL);
-        if (FD_ISSET(listenfd, &rset)) {
-            connfd = accept(listenfd, (struct sockaddr*)&clientaddr, &remote_len);
+        nready = poll(client, maxi + 1, INFTIM);
+        if (client[0].revents & POLLRDNORM) {
+            remote_len = sizeof(clientaddr);
+            connfd = accept(listenfd, (struct sockaddr *)&serveraddr, &remote_len);
 
-            for (i = 0; i < FD_SETSIZE; i++) {
-                if (client[i] < 0) {
-                    client[i] = connfd;
+            for (i = 0; i < OPEN_MAX; i++) {
+                if (client[i].fd < 0) {
+                    client[i].fd = connfd;
                     break;
                 }
-                if (i == FD_SETSIZE) {
-                    err_sys("too many clients");
+                if (i == OPEN_MAX) {
+                    err_sys("too many client");
                 }
-                FD_SET(connfd, &allset);
-                if(connfd > maxfd) {
-                    maxfd = connfd;
-                }
+                client[i].events = POLLRDNORM;
                 if (i > maxi) {
                     maxi = i;
                 }
@@ -76,15 +69,23 @@ int main(int argc, char *argv[])
                 }
             }
 
-            for (i = 0; i <= maxi; i++) {
-                if ((sockfd = client[i]) < 0) {
+            for (i = 1; i <= maxi; i++) {
+                if ((sockfd = client[i].fd < 0)) {
                     continue;
                 }
-                if (FD_ISSET(sockfd, &rset)) {
-                    if ((n = Read(sockfd, buf, MAXLINE)) == 0) {
+                if (client[i].revents & (POLLRDNORM | POLLERR)) {
+                    if ((n = read(sockfd, buf, MAXLINE)) < 0) {
+                        if (errno == ECONNRESET) {
+                            close(sockfd);
+                            client[i].fd = -1;
+                        }
+                        else {
+                            err_sys("read error");
+                        }
+                    }
+                    else if (n == 0) {
                         close(sockfd);
-                        FD_CLR(sockfd, &rset);
-                        client[i] = -1;
+                        client[i].fd = -1;
                     }
                     else {
                         Write(sockfd, buf, n);
@@ -95,7 +96,6 @@ int main(int argc, char *argv[])
                     }
                 }
             }
-
         }
     }
     return 0;
