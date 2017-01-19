@@ -2,6 +2,11 @@
 #include <sys/select.h>
 #include <sys/time.h>
 
+#define max(a, b) \
+        __extension__ ({ __typeof__ (a) _a = (a);\
+          __typeof__ (b) _b = (b);\
+          _a > _b ? _a : _b; })
+
 void cli_str(FILE *fp, int sockfd)
 {
     int maxfd, stdineof;
@@ -21,7 +26,7 @@ void cli_str(FILE *fp, int sockfd)
 
         if (FD_ISSET(sockfd, &rset)) {
             if ((n = Read(sockfd, buffer, MAXLINE)) == 0) {
-                if (stdineof = 1) {
+                if (stdineof == 1) {
                     return;
                 }
                 else {
