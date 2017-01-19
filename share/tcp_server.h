@@ -5,8 +5,8 @@
 	> Created Time: 六  9/10 13:11:13 2016
  ************************************************************************/
 
-#ifndef _TCP_SERVER_H
-#define _TCP_SERVER_H
+#ifndef NETWORK_SHARE_TCP_SERVER_H
+#define NETWORK_SHARE_TCP_SERVER_H
 
 #include <stdio.h>
 #include <sys/types.h>
@@ -19,7 +19,6 @@
 #include <errno.h>
 #include <stdarg.h>
 #include <unistd.h>
-
 
 #define MAXLINE 256
 
@@ -36,5 +35,10 @@ void client_info(int connfd);
 int tcp_echo(int remote_fd);
 ssize_t Recv(int socket, void *buffer, size_t length, int flags);
 void set_address(struct sockaddr_in *server,const char *serverip, const char *port);
+int Select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, struct timeval *timeout);
+void cli_str(FILE *fp, int sockfd);
+size_t Read(int fd, void *buf, size_t cout);
+size_t Write(int fd, void *buf, size_t cout);
+int Shutdown(int sockfd, int how);
 
-#endif
+#endif /* NETWORK_SHARE_TCP_SERVER_H */ 
