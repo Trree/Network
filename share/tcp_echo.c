@@ -5,9 +5,22 @@ int tcp_echo(int remote_fd)
     int revn;
     int sendn;
     char buff[MAXLINE];
-    //revn = Recv(remote_fd, buff, sizeof(buff), 0);
-    revn = recv(remote_fd, buff, sizeof(buff), 0);
-    printf("%s", buff);
+    bzero(buff, MAXLINE);
+    revn = Recv(remote_fd, buff, sizeof(buff), 0);
+    fputs(buff, stdout);
+    sendn = send(remote_fd, buff, revn, 0);
+    
+    return sendn;
+}
+
+int tcp_echo_len(int remote_fd)
+{
+    int revn;
+    int sendn;
+    char buff[MAXLINE];
+    bzero(buff, MAXLINE);
+    revn = Recvlen(remote_fd, buff, sizeof(buff), 0);
+    fputs(buff, stdout);
     sendn = send(remote_fd, buff, revn, 0);
     
     return sendn;

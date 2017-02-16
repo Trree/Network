@@ -156,12 +156,28 @@ int Select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, struc
     return n;
 }
 
+ssize_t Recv(int socket, void *buffer, size_t length, int flags)
+{
+    int nread = 0;
+    nread = recv(socket, buffer, length, flags);
+    if (nread < 0) {
+        /*注意这个错误的产生是由于什么原因*/
+        if (errno == EINTR) {
+            nread = 0;
+        }
+        else {
+            return -1;
+        }
+    }
+    
+    return nread;
+}
 /*
  * 实现对输入的字符串完全输入
  */
-ssize_t Recv(int socket, void *buffer, size_t length, int flags)
+ssize_t Recvlen(int socket, void *buffer, size_t length, int flags)
 {
-    int nread;
+    int nread = 0;
     char *bufp = buffer;
     int nleft = length;
     while(nleft > 0) {

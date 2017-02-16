@@ -43,6 +43,7 @@ char *Fgets(char *ptr, int n, FILE *stream);
 void client_info(int connfd);
 int tcp_echo(int remote_fd);
 ssize_t Recv(int socket, void *buffer, size_t length, int flags);
+ssize_t Recvlen(int socket, void *buffer, size_t length, int flags);
 void set_address(struct sockaddr_in *server,const char *serverip, const char *port);
 int Select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, struct timeval *timeout);
 void cli_str(FILE *fp, int sockfd);
