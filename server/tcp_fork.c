@@ -40,10 +40,10 @@ int main(int argc, char *argv[])
         if ((childpid = fork()) == 0) {
             close(listenfd);
             client_info(connfd);
-            tcp_echo(connfd);
-            exit(0);
+            while(1) {
+                tcp_echo(connfd);
+            }
         }
-        close(connfd);
     }
 
     return 0;
