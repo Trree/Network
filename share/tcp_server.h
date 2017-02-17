@@ -22,6 +22,7 @@
 #include <sys/select.h>
 #include <poll.h>
 #include <sys/time.h>
+#include <sys/ioctl.h>
 
 #define max(a, b) \
         __extension__ ({ __typeof__ (a) _a = (a);\
@@ -30,6 +31,8 @@
 
 #define MAXLINE 256
 #define LISTENQ 5
+#define TRUE             1
+#define FALSE            0
 
 void err_sys(const char *fmt, ...);
 void err_doit(int errnoflag, int error, const char *fmt, va_list ap);

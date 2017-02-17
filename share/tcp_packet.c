@@ -149,8 +149,12 @@ int Connect(int socket, const struct sockaddr *address,
 int Select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, struct timeval *timeout)
 {
     int n = 0;
-    if ((n = select(nfds, readfds, writefds, exceptfds, timeout)) < 0) {
-        err_sys("Select error.");
+    n = select(nfds, readfds, writefds, exceptfds, timeout);
+    if (n < 0) {
+        err_sys("select error.");
+    }
+    if (n == 0) {
+        printf("select() timed out.  End program.\n");
     }
 
     return n;
