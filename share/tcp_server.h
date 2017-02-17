@@ -23,6 +23,7 @@
 #include <poll.h>
 #include <sys/time.h>
 #include <sys/ioctl.h>
+#include <fcntl.h>
 
 #define max(a, b) \
         __extension__ ({ __typeof__ (a) _a = (a);\
@@ -53,5 +54,6 @@ void cli_str(FILE *fp, int sockfd);
 size_t Read(int fd, void *buf, size_t cout);
 size_t Write(int fd, void *buf, size_t cout);
 int Shutdown(int sockfd, int how);
+int make_socket_non_blocking(int sfd);
 
 #endif /* NETWORK_SHARE_TCP_SERVER_H */ 
