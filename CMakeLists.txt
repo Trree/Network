@@ -20,13 +20,17 @@ endif (USE_MYMATH)
 
 # add the binary tree to the search path for include files
 # so that we will find TutorialConfig.h
-ADD_DEFINITIONS(-std=c99 -g -W -Wall -pedantic -D_GNU_SOURCE)
+ADD_DEFINITIONS(-std=c99 -g3 -W -Wall -pedantic -D_GNU_SOURCE)
 #ADD_DEFINITIONS(-std=c99 -g -W)
 
 aux_source_directory(share DIR_SRCS)
 # add the executable
 add_executable(client client/tcp_client.c ${DIR_SRCS})
-add_executable(server server/tcp_server.c ${DIR_SRCS})
+add_executable(sselect server/tcp_select.c ${DIR_SRCS})
+add_executable(sfork server/tcp_fork.c   ${DIR_SRCS})
+add_executable(spoll server/tcp_poll.c   ${DIR_SRCS})
 
 install (TARGETS client DESTINATION  /home/koal/network/bin)
-install (TARGETS server DESTINATION  /home/koal/network/bin)
+install (TARGETS sselect DESTINATION  /home/koal/network/bin)
+install (TARGETS sfork  DESTINATION  /home/koal/network/bin)
+install (TARGETS spoll  DESTINATION  /home/koal/network/bin)

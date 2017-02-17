@@ -146,12 +146,42 @@ int Connect(int socket, const struct sockaddr *address,
     return n;
 }
 
+int Select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, struct timeval *timeout)
+{
+    int n = 0;
+    n = select(nfds, readfds, writefds, exceptfds, timeout);
+    if (n < 0) {
+        err_sys("select error.");
+    }
+    if (n == 0) {
+        printf("select() timed out.  End program.\n");
+    }
+
+    return n;
+}
+
+ssize_t Recv(int socket, void *buffer, size_t length, int flags)
+{
+    int nread = 0;
+    nread = recv(socket, buffer, length, flags);
+    if (nread < 0) {
+        /*注意这个错误的产生是由于什么原因*/
+        if (errno == EINTR) {
+            nread = 0;
+        }
+        else {
+            return -1;
+        }
+    }
+    
+    return nread;
+}
 /*
  * 实现对输入的字符串完全输入
  */
-ssize_t Recv(int socket, void *buffer, size_t length, int flags)
+ssize_t Recvlen(int socket, void *buffer, size_t length, int flags)
 {
-    int nread;
+    int nread = 0;
     char *bufp = buffer;
     int nleft = length;
     while(nleft > 0) {
@@ -177,39 +207,30 @@ ssize_t Recv(int socket, void *buffer, size_t length, int flags)
     return (length - nleft);
 }
 
-int tcp_echo(int remote_fd)
+size_t Read(int fd, void *buf, size_t cout)
 {
-    int revn;
-    int sendn;
-    char buff[MAXLINE];
-    revn = Recv(remote_fd, buff, sizeof(buff), 0);
-    sendn = send(remote_fd, buff, revn, 0);
-    
-    return sendn;
+    int n;
+    if ((n = read(fd, buf, cout)) < 0) {
+        err_sys("Read error.");
+    }
+    return n;
 }
 
-void client_info(int connfd)
+size_t Write(int fd, void *buf, size_t cout)
 {
-    socklen_t len;
-    struct sockaddr_storage addr;
-    char ipstr[INET6_ADDRSTRLEN];
-    int port;
-
-    len = sizeof(addr);
-    getpeername(connfd, (struct sockaddr *)&addr, &len);
-
-    if (addr.ss_family == AF_INET) {
-        struct sockaddr_in *s = (struct sockaddr_in *)&addr;
-        port = ntohs(s->sin_port);
-        inet_ntop(AF_INET, &s->sin_addr, ipstr, sizeof(ipstr));
+    int n = 0;
+    if ((n = write(fd, buf, cout)) < 0) {
+        err_sys("Write error.");
     }
-    else {
-        struct sockaddr_in6 *s = (struct sockaddr_in6 *)&addr;
-        port = ntohs(s->sin6_port);
-        inet_ntop(AF_INET, &s->sin6_addr, ipstr, sizeof(ipstr));
-    }
-
-    printf("Peer IP address: %s\n", ipstr);
-    printf("Peer port      :%d\n", port);
+    return n;
 }
 
+int Shutdown(int sockfd, int how)
+{
+    int n = 0;
+    if ((n = shutdown(sockfd, how)) < 0) {
+        err_sys("Shutdown error.");
+    }
+
+    return n;
+}

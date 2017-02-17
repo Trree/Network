@@ -61,6 +61,7 @@ int main(int argc, char *argv[])
     connfd = Socket(AF_INET, SOCK_STREAM, 0);
     Connect(connfd, (struct sockaddr *) &serveraddr, sizeof(serveraddr));
     client_echo(stdin, connfd);
+    cli_str(stdin, connfd);
     close(connfd);
 
     return 0;
