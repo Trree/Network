@@ -117,5 +117,11 @@ int main(int argc, char *argv[])
         }
     }
 
+    for (i = 0; i < maxfd; i++) {
+        if (FD_ISSET(i, &master)) {
+            close(i);
+        }
+    }
+
     return 0;
 }

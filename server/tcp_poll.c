@@ -38,19 +38,22 @@ int main(int argc, char *argv[])
     struct pollfd client[OPEN_MAX];
     int i, n,maxi, sockfd, nready;
     char buf[MAXLINE];
-    client[0].fd = listenfd;
-    client[0].events = POLLRDNORM;
     for (i = 0; i < OPEN_MAX; i++) {
         client[i].fd = -1;
     }
+    client[0].fd = listenfd;
+    client[0].events = POLLRDNORM;
     maxi = 0;
 
     socklen_t remote_len = sizeof(struct sockaddr_in);
     for ( ; ; ) {
+        printf("Start poll .....\n");
         nready = poll(client, maxi + 1, INFTIM);
         if (client[0].revents & POLLRDNORM) {
+            printf("Listening Socket is readable\n");
             remote_len = sizeof(clientaddr);
             connfd = accept(listenfd, (struct sockaddr *)&serveraddr, &remote_len);
+            printf("New incoming connection - %d\n", connfd);
 
             for (i = 0; i < OPEN_MAX; i++) {
                 if (client[i].fd < 0) {
@@ -74,6 +77,7 @@ int main(int argc, char *argv[])
                     continue;
                 }
                 if (client[i].revents & (POLLRDNORM | POLLERR)) {
+                    printf(" Descriptor %d is readable\n", i);
                     if ((n = read(sockfd, buf, MAXLINE)) < 0) {
                         if (errno == ECONNRESET) {
                             close(sockfd);
